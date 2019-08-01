@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 
 /**
  * 
@@ -7,13 +8,11 @@
  */
 public class MyBinaryHeap<k extends Comparable<k>> {
 	
-	// initial capacity
-	private int capacity = 20;
-	Node<k>[] heap;
+	// dynamic array representing heap
+	ArrayList<Node<k>> heap;
 	
-	@SuppressWarnings("unchecked")
 	public MyBinaryHeap () {
-		heap = new Node[this.capacity];
+		heap = new ArrayList<Node<k>>();
 	}
 	
 	/**
@@ -22,10 +21,19 @@ public class MyBinaryHeap<k extends Comparable<k>> {
 	 * @param current
 	 * @param child
 	 */
-	private void swap(int current, int child) {
-		Node<k> temp = this.heap[current];
-		this.heap[current] = this.heap[child];
-		this.heap[current] = temp;
+	private void swapNodes(int current, int child) {
+		Node<k> temp = this.heap.get(current);
+		this.heap.add(current, this.heap.get(child));
+		this.heap.add(child, temp);
+	}
+	
+	/**
+	 * number of nodes in the heap
+	 * 
+	 * @return size
+	 */
+	public int size() {
+		return this.heap.size();
 	}
 	
 	/**
@@ -40,8 +48,8 @@ public class MyBinaryHeap<k extends Comparable<k>> {
 	 * decrement start position by 1
 	 */
 	private void heapfiy() {
-		int end = this.heap.length - 1, current;
-		int start = (end-1) / 2;
+		int end = this.heap.size() - 1, current;
+		int start = (end - 1) / 2;
 		while (start >= 0) {
 			current = start;
 			while (current * 2 + 1 <= end) {
@@ -50,13 +58,13 @@ public class MyBinaryHeap<k extends Comparable<k>> {
 				int child = left;
 				
 				if (right < end + 1 
-						&& this.heap[child].key
-						.compareTo(this.heap[right].key) > 0) {
+						&& this.heap.get(child).value
+						.compareTo(heap.get(right).value) > 0) {
 					child = right;
 				} 
-				if (this.heap[child].key.
-						compareTo(this.heap[current].key) < 0) {
-					swap(current, child);
+				if (this.heap.get(child).value.
+						compareTo(this.heap.get(current).value) < 0) {
+					swapNodes(current, child);
 				}
 				
 				current = child;
@@ -65,9 +73,66 @@ public class MyBinaryHeap<k extends Comparable<k>> {
 		}
 	}
 	
+	/**
+	 * remove root node
+	 * swap root value with right most leaf node value
+	 * in the array, then run heapfiy()
+	 * 
+	 * @return Node<value>
+	 */
+	public k extractMin() {
+		int end = this.heap.size() - 1;
+		k value = this.heap.get(0).value;
+		
+		this.heap.get(0).value = this.heap.get(end).value;
+		this.heap.remove(end);
+		
+		this.heapfiy();
+		
+		return value;
+	}
+	
+	/**
+	 * delete first node associated with value in heap
+	 * then run heapfiy()
+	 * 
+	 * @param value
+	 */
+	public void delete(k value) {
+		int end = this.heap.size() - 1;
+		for (int i = 0 ; i < this.heap.size() ;i++) {
+			if (this.heap.get(i).value.equals(value)) {
+				this.heap.get(i).value = this.heap.get(end).value;
+				break;
+			}
+		}
+		this.heap.remove(end);
+		this.heapfiy();
+	}
+	
+	/**
+	 * return min value in heap
+	 * 
+	 * @return value
+	 */
+	public k getMin() {
+		return this.heap.get(0).value;
+	}
+	
+	/**
+	 * insert node as leaf then run heapfiy()
+	 * 
+	 * @param value
+	 */
+	public void insert(k value) {
+		Node<k> node = new Node<k>();
+		node.value = value;
+		this.heap.add(node);
+		this.heapfiy();
+	}
+	
 	@SuppressWarnings("hiding")
 	private class Node<k> {
-		@SuppressWarnings("unused")
-		private k key;
+		private k value;
 	}
 }
